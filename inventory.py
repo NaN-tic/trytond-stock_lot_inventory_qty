@@ -37,16 +37,10 @@ class Inventory:
     
             # Compute product quantities
             with Transaction().set_context(stock_date_end=inventory.date):
-                #~ pbl = Product.products_by_location([inventory.location.id],
-                        #~ product_ids)
                 pbl = Product.products_by_location([inventory.location.id],
                     product_ids=product2lines.keys(),
                     grouping=('product', 'lot'))
 
-                with Transaction().set_context(stock_date_end=inventory.date):
-                    pbl = Product.products_by_location([inventory.location.id],
-                        product_ids=product2lines.keys(),
-                        grouping=('product', 'lot'))
                 product_qty = defaultdict(dict)
                 for (location_id, product_id, lot_id), quantity \
                         in pbl.iteritems():
@@ -56,6 +50,8 @@ class Inventory:
                 product2uom = dict((p.id, p.default_uom.id) for p in products)
 
                 for product_id, lines in product2lines.iteritems():
+                    if product_id not in product_qty:
+                        continue
                     quantities = product_qty[product_id]
                     uom_id = product2uom[product_id]
                     for line in lines:
