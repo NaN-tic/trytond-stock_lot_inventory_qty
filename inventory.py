@@ -37,16 +37,10 @@ class Inventory:
     
             # Compute product quantities
             with Transaction().set_context(stock_date_end=inventory.date):
-                #~ pbl = Product.products_by_location([inventory.location.id],
-                        #~ product_ids)
                 pbl = Product.products_by_location([inventory.location.id],
                     product_ids=product2lines.keys(),
                     grouping=('product', 'lot'))
 
-                with Transaction().set_context(stock_date_end=inventory.date):
-                    pbl = Product.products_by_location([inventory.location.id],
-                        product_ids=product2lines.keys(),
-                        grouping=('product', 'lot'))
                 product_qty = defaultdict(dict)
                 for (location_id, product_id, lot_id), quantity \
                         in pbl.iteritems():
