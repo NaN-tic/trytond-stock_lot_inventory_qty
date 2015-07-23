@@ -29,12 +29,13 @@ class Inventory:
                 if (line.product.lot_is_required(inventory.location,
                             inventory.lost_found)
                         or line.product.lot_is_required(inventory.lost_found,
-                            inventory.location)):
+                            inventory.location)
+                        or line.lot):
                     product2lines[line.product.id].append(line)
 
             if not product2lines:
                 continue
-    
+
             # Compute product quantities
             with Transaction().set_context(stock_date_end=inventory.date):
                 pbl = Product.products_by_location([inventory.location.id],
