@@ -23,6 +23,7 @@ class Inventory:
 
         super(Inventory, cls).update_lines(inventories)
 
+        to_create = []
         for inventory in inventories:
             product2lines = defaultdict(list)
             for line in inventory.lines:
@@ -42,30 +43,40 @@ class Inventory:
                     product_ids=product2lines.keys(),
                     grouping=('product', 'lot'))
 
-                product_qty = defaultdict(dict)
-                for (location_id, product_id, lot_id), quantity \
-                        in pbl.iteritems():
-                    product_qty[product_id][lot_id] = quantity
+            product_qty = defaultdict(dict)
+            for (location_id, product_id, lot_id), quantity in pbl.iteritems():
+                product_qty[product_id][lot_id] = quantity
 
-                products = Product.browse(product_qty.keys())
-                product2uom = dict((p.id, p.default_uom.id) for p in products)
+            products = Product.browse(product_qty.keys())
+            product2uom = dict((p.id, p.default_uom.id) for p in products)
 
-                for product_id, lines in product2lines.iteritems():
-                    quantities = product_qty[product_id]
-                    uom_id = product2uom[product_id]
-                    for line in lines:
-                        lot_id = line.lot.id if line.lot else None
-                        if lot_id in quantities:
-                            quantity = quantities.pop(lot_id)
-                        elif lot_id is None and quantities:
-                            lot_id = quantities.keys()[0]
-                            quantity = quantities.pop(lot_id)
-                        else:
-                            lot_id = None
-                            quantity = 0.0
+            for product_id, lines in product2lines.iteritems():
+                quantities = product_qty[product_id]
+                uom_id = product2uom[product_id]
+                for line in lines:
+                    lot_id = line.lot.id if line.lot else None
+                    if lot_id in quantities:
+                        quantity = quantities.pop(lot_id)
+                    elif lot_id is None and quantities:
+                        lot_id = quantities.keys()[0]
+                        quantity = quantities.pop(lot_id)
+                        # Create inventory lines with remaining lots
+                        while len(quantities):
+                            lot_id2 = quantities.keys()[0]
+                            quantity2 = quantities.pop(lot_id2)
+                            values = Line.create_values4complete(
+                                product_id, inventory, quantity2, uom_id)
+                            values['lot'] = lot_id2
+                            to_create.append(values)                                
+                    else:
+                        lot_id = None
+                        quantity = 0.0
 
-                        values = line.update_values4complete(quantity, uom_id)
-                        if (values or lot_id != (line.lot.id
-                                    if line.lot else None)):
-                            values['lot'] = lot_id
-                            Line.write([line], values)
+                    values = line.update_values4complete(quantity, uom_id)
+                    if (values or lot_id != (line.lot.id
+                                if line.lot else None)):
+                        values['lot'] = lot_id
+                        Line.write([line], values)
+
+        if to_create:
+            Line.create(to_create)
