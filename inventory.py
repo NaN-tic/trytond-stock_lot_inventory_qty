@@ -55,9 +55,7 @@ class Inventory:
                 uom_id = product2uom[product_id]
                 for line in lines:
                     lot_id = line.lot.id if line.lot else None
-                    if lot_id in quantities:
-                        quantity = quantities.pop(lot_id)
-                    elif lot_id is None and quantities:
+                    if lot_id is None and quantities:
                         lot_id = quantities.keys()[0]
                         quantity = quantities.pop(lot_id)
                         # Create inventory lines with remaining lots
@@ -67,7 +65,9 @@ class Inventory:
                             values = Line.create_values4complete(
                                 product_id, inventory, quantity2, uom_id)
                             values['lot'] = lot_id2
-                            to_create.append(values)                                
+                            to_create.append(values)
+                    elif lot_id in quantities:
+                        quantity = quantities.pop(lot_id)
                     else:
                         lot_id = None
                         quantity = 0.0
