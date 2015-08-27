@@ -46,6 +46,9 @@ class Inventory:
             product_qty = defaultdict(dict)
             for (location_id, product_id, lot_id), quantity in pbl.iteritems():
                 product_qty[product_id][lot_id] = quantity
+            for product_id in product2lines.keys():
+                if product_id not in product_qty:
+                    product_qty[product_id][None] = 0.0
 
             products = Product.browse(product_qty.keys())
             product2uom = dict((p.id, p.default_uom.id) for p in products)
