@@ -13,4 +13,6 @@ computed.
    quantiy of the product is computed.
 
    2.b) If the lot is required at inventory locations, new inventory lines are
-   created, each one with a lot of the product and its expected quantity.
+   created, each one with a lot of the product and its expected quantity, if
+   the expected quantity is different of zero, to avoid expand old lots without
+   stock.

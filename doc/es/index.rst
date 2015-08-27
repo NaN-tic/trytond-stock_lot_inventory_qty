@@ -15,4 +15,5 @@ estimada de este lote.
 
   2.b) Si el lote es requerido en las ubicaciones del inventario, se crean
   nuevas líneas de inventario, cada una con un lote del producto y su cantidad
-  estimada.
+  estimada, siempre que la cantiad estimada sea distinta de cero, para evitar
+  rellenar con lotes antiguos que ya no tienen stock.
