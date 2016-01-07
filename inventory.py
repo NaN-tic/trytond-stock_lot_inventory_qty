@@ -50,12 +50,8 @@ class Inventory:
                 if product_id not in product_qty:
                     product_qty[product_id][None] = 0.0
 
-            products = Product.browse(product_qty.keys())
-            product2uom = dict((p.id, p.default_uom.id) for p in products)
-
             for product_id, lines in product2lines.iteritems():
                 quantities = product_qty[product_id]
-                uom_id = product2uom[product_id]
                 for line in lines:
                     lot_id = line.lot.id if line.lot else None
                     if lot_id is None and quantities:
@@ -70,8 +66,7 @@ class Inventory:
                             if quantity == 0:
                                 lot_id, quantity = lot_id2, quantity2
                             else:
-                                values = Line.create_values4complete(
-                                    product_id, inventory, quantity2, uom_id)
+                                values = Line.create_values4complete(quantity2)
                                 values['lot'] = lot_id2
                                 to_create.append(values)
                     elif lot_id in quantities:
@@ -80,7 +75,7 @@ class Inventory:
                         lot_id = None
                         quantity = 0.0
 
-                    values = line.update_values4complete(quantity, uom_id)
+                    values = line.update_values4complete(quantity)
                     if (values or lot_id != (line.lot.id
                                 if line.lot else None)):
                         values['lot'] = lot_id
