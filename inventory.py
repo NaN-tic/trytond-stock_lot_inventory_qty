@@ -6,10 +6,10 @@ from trytond.pool import Pool, PoolMeta
 from trytond.transaction import Transaction
 
 __all__ = ['Inventory']
-__metaclass__ = PoolMeta
 
 
 class Inventory:
+    __metaclass__ = PoolMeta
     __name__ = 'stock.inventory'
 
     @classmethod
